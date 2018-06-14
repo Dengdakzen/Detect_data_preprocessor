@@ -1,4 +1,6 @@
 import numpy as np
+import matplotlib
+# matplotlib.use('TkAgg')
 from matplotlib import pyplot as plt
 import cv2
 import json
@@ -18,7 +20,7 @@ def fun2(img):
     # plt.xlim([0, 256])  
     plt.show() 
 
-def fun3(img1,img2):  
+def compare_imgs_hsv(img1,img2):  
     hsv1 = cv2.cvtColor(img1,cv2.COLOR_BGR2HSV)
     hsv2 = cv2.cvtColor(img2,cv2.COLOR_BGR2HSV)
     h1 = cv2.calcHist([hsv1], [0], None, [256], [0, 256])
@@ -28,42 +30,11 @@ def fun3(img1,img2):
     # cv2.normalize()
     r1 = cv2.compareHist(h1,h2,cv2.HISTCMP_CORREL)
     r2 = cv2.compareHist(s1,s2,cv2.HISTCMP_CORREL)
-    print(r1,r2)
+    return 0.5*r1+0.5*r2
 
-
+def generate_images_crops(img,box_array):
     
-
-def color_moments(filename):
-    img = cv2.imread(filename)
-    if img is None:
-        return
-    # Convert BGR to HSV colorspace
-    hsv = cv2.cvtColor(img, cv2.COLOR_BGR2HSV)
-    # Split the channels - h,s,v
-    h, s, v = cv2.split(hsv)
-    # Initialize the color feature
-    color_feature = []
-    # N = h.shape[0] * h.shape[1]
-    # The first central moment - average 
-    h_mean = np.mean(h)  # np.sum(h)/float(N)
-    s_mean = np.mean(s)  # np.sum(s)/float(N)
-    v_mean = np.mean(v)  # np.sum(v)/float(N)
-    color_feature.extend([h_mean, s_mean, v_mean])
-    # The second central moment - standard deviation
-    h_std = np.std(h)  # np.sqrt(np.mean(abs(h - h.mean())**2))
-    s_std = np.std(s)  # np.sqrt(np.mean(abs(s - s.mean())**2))
-    v_std = np.std(v)  # np.sqrt(np.mean(abs(v - v.mean())**2))
-    color_feature.extend([h_std, s_std, v_std])
-    # The third central moment - the third root of the skewness
-    h_skewness = np.mean(abs(h - h.mean())**3)
-    s_skewness = np.mean(abs(s - s.mean())**3)
-    v_skewness = np.mean(abs(v - v.mean())**3)
-    h_thirdMoment = h_skewness**(1./3)
-    s_thirdMoment = s_skewness**(1./3)
-    v_thirdMoment = v_skewness**(1./3)
-    color_feature.extend([h_thirdMoment, s_thirdMoment, v_thirdMoment])
-
-    return color_feature
+    for i in 
 
 def IOU(boxA, boxB):
     # determine the (x, y)-coordinates of the intersection rectangle
@@ -122,10 +93,6 @@ def main():
             data = json.load(F)['Players']
             # print(data)
         count += 1
-
-        # for index,i in enumerate(data):
-        #     thisframe = cv2.rectangle(frame,(i['x'],i['y']),(i['x']+i['width'],i['y']+i['height']),(255,0,0))
-        #     thisframe = cv2.putText(thisframe,str(index),(i['x'],i['y']),font, 1.2, (255, 255, 255), 2)
         
         if count == 11:
             i = data[21]
@@ -133,6 +100,7 @@ def main():
             boxA = (i['x'],i['y'],i['x']+i['width'],i['y']+i['height'])
             thisframe = cv2.putText(thisframe,str(21),(i['x'],i['y']),font, 1.2, (255, 255, 255), 2)
         else:
+            
             index,val = test(boxA,data)
             print(val)
             if index == -1:
@@ -158,20 +126,28 @@ def main():
     cv2.destroyAllWindows()
 
 if __name__ == '__main__':
-    filename1 = '../Detect_data/Images/0.jpg'
-    # filename2 = '../Detect_data/Images/1000.jpg'
-    img1 = cv2.imread(filename1)
-    # img2 = cv2.imread(filename2)
-    # fun3(img1,img2)
-    filename = '../Detect_data/Position/' + str(10) + '.json'
-    with open(filename,'r') as F:
-        data = json.load(F)['Players']
-    i = data[28]
-    print(i)
-    cv2.namedWindow('img',cv2.WINDOW_AUTOSIZE)
-    img_crop = img1[i['y']:(i['y']+i['height']),i['x']:(i['x']+i['width'])]
-    # print(img_crop)
-    # cv2.rectangle(img1,(i['x'],i['y']),(i['x']+i['width'],i['y']+i['height']),(255,0,0))
-    cv2.imshow('img',img_crop)
-    cv2.waitKey(0)
-
+    # filename1 = '../Detect_data/Images/0.jpg'
+    # # filename2 = '../Detect_data/Images/1000.jpg'
+    # img1 = cv2.imread(filename1)
+    # # img2 = cv2.imread(filename2)
+    # # fun3(img1,img2)
+    # filename = '../Detect_data/Position/' + str(10) + '.json'
+    # with open(filename,'r') as F:
+    #     data = json.load(F)['Players']
+    # i = data[28]
+    # # print(i)
+    # cv2.namedWindow('img1',cv2.WINDOW_AUTOSIZE)
+    # img_crop1 = img1[i['y']:(i['y']+i['height']),i['x']:(i['x']+i['width'])]
+    # i = data[13]
+    # # print(i)
+    # cv2.namedWindow('img2',cv2.WINDOW_AUTOSIZE)
+    # img_crop2 = img1[i['y']:(i['y']+i['height']),i['x']:(i['x']+i['width'])]
+    # # print(img_crop)
+    # # cv2.rectangle(img1,(i['x'],i['y']),(i['x']+i['width'],i['y']+i['height']),(255,0,0))
+    # # cv2.imshow('img1',img_crop1)
+    # # cv2.imshow('img2',img_crop2)
+    # # cv2.waitKey(0)
+    # # fun2(img_crop)
+    # # fun1()
+    # fun3(img_crop1,img_crop2)
+    main()
