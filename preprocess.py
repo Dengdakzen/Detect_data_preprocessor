@@ -2,13 +2,14 @@ import numpy as np
 import cv2
 import json
 
-cap = cv2.VideoCapture('/Users/dazhen/Desktop/2min.mp4')
+cap = cv2.VideoCapture('../Detect_data/2min.mp4')
+# cv2.
 count = 0
 
 while(True):
     # Capture frame-by-frame
     ret, frame = cap.read()
-    filename = '/Users/dazhen/Desktop/Position/' + str(count) + '.json'
+    filename = '../Detect_data/Position/' + str(count) + '.json'
     with open(filename,'r') as F:
         data = json.load(F)['Players']
         # print(data)
@@ -22,6 +23,7 @@ while(True):
 
     # Display the resulting frame
     cv2.imshow('frame',thisframe)
+    cv2.waitKey(30)
     if cv2.waitKey(1) & 0xFF == ord('q'):
         break
 
