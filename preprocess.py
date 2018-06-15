@@ -33,8 +33,11 @@ def compare_imgs_hsv(img1,img2):
     return 0.5*r1+0.5*r2
 
 def generate_images_crops(img,box_array):
-    
-    for i in 
+    images = []
+    for i in box_array:
+        thisimg = img[i['y']:(i['y']+i['height']),i['x']:(i['x']+i['width'])]
+        images.append(thisimg)
+    return images
 
 def IOU(boxA, boxB):
     # determine the (x, y)-coordinates of the intersection rectangle
@@ -65,16 +68,29 @@ def IOU(boxA, boxB):
     # return the intersection over union value
     return iou
 
-def test(boxA,arrayB):
+def test(boxA,original_img,img,arrayB):
+    images = generate_images_crops(img,arrayB)
+    imgA = img[boxA[1]:boxA[3],boxA[0]:boxA[2]]
     maxval = 0
     maxind = -1
     for index,i in enumerate(arrayB):
-        thisval = IOU(boxA,(i['x'],i['y'],i['x']+i['width'],i['y']+i['height']))
-        print(thisval)
-        if thisval > maxval:
-            maxval = thisval
+        IOU_val = IOU(boxA,(i['x'],i['y'],i['x']+i['width'],i['y']+i['height']))
+        print(IOU_val)
+        hsv_hist_val = compare_imgs_hsv(imgA,images[index])
+        print(hsv_hist_val)
+        hsv_with_original = compare_imgs_hsv(original_img,images[index])
+        print(hsv_with_original)
+        val = IOU_val*0.2 + hsv_hist_val*0.3 + hsv_with_original*0.5
+        print('total_val: ',val,'\n')
+        if  val > maxval:
+            maxval = val
             maxind = index
-    return maxind,maxval
+            final = (IOU_val,hsv_hist_val,hsv_with_original)
+            final_imgs = (imgA,original_img,images[index])
+    cv2.imshow('last_box',final_imgs[0])
+    cv2.imshow('original_box',final_imgs[1])
+    cv2.imshow('match_box',final_imgs[2])
+    return maxind,maxval,final
 
 def main():
     cap = cv2.VideoCapture('../Detect_data/2min.mp4')
@@ -92,16 +108,18 @@ def main():
         with open(filename,'r') as F:
             data = json.load(F)['Players']
             # print(data)
+        print(count)
         count += 1
         
         if count == 11:
             i = data[21]
             thisframe = cv2.rectangle(frame,(i['x'],i['y']),(i['x']+i['width'],i['y']+i['height']),(255,0,0))
+            original_img = thisframe[i['y']:(i['y']+i['height']),i['x']:(i['x']+i['width'])]
             boxA = (i['x'],i['y'],i['x']+i['width'],i['y']+i['height'])
             thisframe = cv2.putText(thisframe,str(21),(i['x'],i['y']),font, 1.2, (255, 255, 255), 2)
         else:
-            
-            index,val = test(boxA,data)
+            index,val,final = test(boxA,original_img,frame,data)
+            print(final)
             print(val)
             if index == -1:
                 break
@@ -117,7 +135,7 @@ def main():
 
         # Display the resulting frame
         cv2.imshow('frame',thisframe)
-        cv2.waitKey(1)
+        cv2.waitKey(0)
         if cv2.waitKey(1) & 0xFF == ord('q'):
             break
 
@@ -136,7 +154,7 @@ if __name__ == '__main__':
     #     data = json.load(F)['Players']
     # i = data[28]
     # # print(i)
-    # cv2.namedWindow('img1',cv2.WINDOW_AUTOSIZE)
+    # cv2.namedWindow('img',cv2.WINDOW_NORMAL)
     # img_crop1 = img1[i['y']:(i['y']+i['height']),i['x']:(i['x']+i['width'])]
     # i = data[13]
     # # print(i)
@@ -150,4 +168,8 @@ if __name__ == '__main__':
     # # fun2(img_crop)
     # # fun1()
     # fun3(img_crop1,img_crop2)
+    # images = generate_images_crops(img1,data)
+    # for i in images:
+    #     cv2.imshow('img',i)
+    #     cv2.waitKey(0)
     main()
