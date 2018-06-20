@@ -35,17 +35,22 @@ def compare_imgs_hsv(img1,img2):
 
 def compare_imgs_rgb(img1,img2):  
     r1 = cv2.calcHist([img1], [0], None, [256], [0, 256])
-    # r1 = cv2.normalize(h1,h1)
+    cv2.normalize(r1,r1,0,1,cv2.NORM_MINMAX)
     r2 = cv2.calcHist([img2], [0], None, [256], [0, 256])
+    cv2.normalize(r2,r2,0,1,cv2.NORM_MINMAX)
     g1 = cv2.calcHist([img1], [1], None, [256], [0, 180])
+    cv2.normalize(g1,g1,0,1,cv2.NORM_MINMAX)
     g2 = cv2.calcHist([img2], [1], None, [256], [0, 180])
+    cv2.normalize(g2,g2,0,1,cv2.NORM_MINMAX)
     b1 = cv2.calcHist([img1], [2], None, [256], [0, 180])
+    cv2.normalize(b1,b1,0,1,cv2.NORM_MINMAX)
     b2 = cv2.calcHist([img2], [2], None, [256], [0, 180])
+    cv2.normalize(b2,b2,0,1,cv2.NORM_MINMAX)
     # cv2.normalize()
     d1 = cv2.compareHist(r1,r2,cv2.HISTCMP_CORREL)
     d2 = cv2.compareHist(g1,g2,cv2.HISTCMP_CORREL)
     d3 = cv2.compareHist(b1,b2,cv2.HISTCMP_CORREL)
-    return 0.4*d1+0.2*d2 + 0.4*d3
+    return 0.6*d1+0.0*d2 + 0.4*d3
 
 def generate_images_crops(img,box_array):
     images = []
@@ -125,11 +130,14 @@ def main():
             # print(data)
         print(count)
         count += 1
+        thisframe = frame.copy
+        for i in data:
+            thisframe = cv2.rectangle(thisframe,(i['x'],i['y']),(i['x']+i['width'],i['y']+i['height']),(255,0,0))
         
         if count == 11:
             i = data[21]
-            thisframe = cv2.rectangle(frame,(i['x'],i['y']),(i['x']+i['width'],i['y']+i['height']),(255,0,0))
-            original_img = thisframe[i['y']:(i['y']+i['height']),i['x']:(i['x']+i['width'])]
+            thisframe = cv2.rectangle(thisframe,(i['x'],i['y']),(i['x']+i['width'],i['y']+i['height']),(255,0,0))
+            original_img = frame[i['y']:(i['y']+i['height']),i['x']:(i['x']+i['width'])]
             boxA = (i['x'],i['y'],i['x']+i['width'],i['y']+i['height'])
             thisframe = cv2.putText(thisframe,str(21),(i['x'],i['y']),font, 1.2, (255, 255, 255), 2)
         else:
@@ -139,7 +147,7 @@ def main():
             if index == -1:
                 break
             i = data[index]
-            thisframe = cv2.rectangle(frame,(i['x'],i['y']),(i['x']+i['width'],i['y']+i['height']),(255,0,0))
+            thisframe = cv2.rectangle(thisframe,(i['x'],i['y']),(i['x']+i['width'],i['y']+i['height']),(255,0,0))
             boxA = (i['x'],i['y'],i['x']+i['width'],i['y']+i['height'])
             thisframe = cv2.putText(thisframe,str(index),(i['x'],i['y']),font, 1.2, (255, 255, 255), 2)
         print('\n')
@@ -190,8 +198,8 @@ if __name__ == '__main__':
     # # main()
     # hsv1 = cv2.cvtColor(img_crop1,cv2.COLOR_BGR2HSV)
     # h1 = cv2.calcHist([hsv1], [0], None, [256], [0, 256])
-    # plt.plot(h1, color='r')
-    # cv2.normalize(h1, h1,0,255*0.1,cv2.NORM_MINMAX)
+    # # plt.plot(h1, color='r')
+    # cv2.normalize(h1, h1,0,1,cv2.NORM_MINMAX)
     # # h2 = cv2.normalize(h1)
     # plt.plot(h1, color='g')
     # # h1 = cv2.normalize(h1,h1) 
